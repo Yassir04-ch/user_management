@@ -5,7 +5,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 @Configuration
-
 public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
     @Nullable
     @Override
