@@ -1,9 +1,12 @@
 package com.usermanagement.controller;
 
 import com.usermanagement.dto.CreateUserRequest;
+import com.usermanagement.dto.ExceptionResponse;
 import com.usermanagement.dto.UpdateUserRequest;
 import com.usermanagement.dto.UserResponseDTO;
 import com.usermanagement.entity.User;
+import com.usermanagement.exception.EmailAlreadyExistsException;
+import com.usermanagement.exception.UserNotFoundException;
 import com.usermanagement.mapper.UserMapper;
 import com.usermanagement.service.UserService;
 import jakarta.validation.Valid;
@@ -27,10 +30,14 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody CreateUserRequest request){
+    public ResponseEntity<?> createUser(@Valid @RequestBody CreateUserRequest request){
+       try{
         User user = userService.createUser(request);
         UserResponseDTO response = userMapper.toResponseDTO(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+       }catch (EmailAlreadyExistsException e){
+           return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionResponse(e.getMessage()));
+       }
     }
 
     @GetMapping
@@ -40,22 +47,37 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable("id") UUID id) {
-        UserResponseDTO user = userService.getUserById(id);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<?> getUserById(@PathVariable("id") UUID id) {
+        try{
+            UserResponseDTO user = userService.getUserById(id);
+            return ResponseEntity.ok(user);
+        }catch (UserNotFoundException e){
+            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ExceptionResponse(e.getMessage()));
+        }
+
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable("id") UUID id, @Valid @RequestBody UpdateUserRequest request) {
-        UserResponseDTO updatedUser = userService.updateUser(id, request);
-        return ResponseEntity.ok(updatedUser);
+    public ResponseEntity<?> updateUser(@PathVariable("id") UUID id, @Valid @RequestBody UpdateUserRequest request) {
+       try{
+           UserResponseDTO updatedUser = userService.updateUser(id, request);
+           return ResponseEntity.ok(updatedUser);
+       }catch (EmailAlreadyExistsException e){
+           return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionResponse(e.getMessage()));
+       }catch (UserNotFoundException e){
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ExceptionResponse(e.getMessage()));
+       }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deactivateUser(@PathVariable("id") UUID id) {
-        userService.deactivateUser(id);
-        return ResponseEntity.noContent().build();
-    }
+    public ResponseEntity<?> deactivateUser(@PathVariable("id") UUID id) {
+        try {
+            userService.deactivateUser(id);
+            return ResponseEntity.noContent().build();
 
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ExceptionResponse(e.getMessage()));
+        }
+    }
 
 }
