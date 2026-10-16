@@ -1,4 +1,4 @@
-package com.usermanagement.mapper;
+package com.usermanagement.exception;
 
 public class UserNotFoundException extends RuntimeException {
     public UserNotFoundException(String message) {

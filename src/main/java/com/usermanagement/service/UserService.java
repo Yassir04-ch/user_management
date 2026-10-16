@@ -7,7 +7,7 @@ import com.usermanagement.entity.User;
 import com.usermanagement.entity.enums.Role;
 import com.usermanagement.exception.EmailAlreadyExistsException;
 import com.usermanagement.mapper.UserMapper;
-import com.usermanagement.mapper.UserNotFoundException;
+import com.usermanagement.exception.UserNotFoundException;
 import com.usermanagement.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -70,7 +70,7 @@ public class UserService {
             throw new UserNotFoundException("utilisateur desactivé");
         }
 
-        if (!user.getEmail().equalsIgnoreCase(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
+        if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException("Email déjà existant");
         }
 
